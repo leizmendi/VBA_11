@@ -1,0 +1,103 @@
+Attribute VB_GlobalNameSpace = False
+Attribute VB_Creatable = False
+Attribute VB_PredeclaredId = False
+Attribute VB_Exposed = False
+Option Compare Database
+Option Explicit
+
+' Definición de la clase Snake
+' Guarda esta clase como Snake
+
+Private Type Coordinate
+    X As Integer
+    Y As Integer
+End Type
+
+Private m_SnakeBody() As Coordinate
+Private m_Direction As String
+Private m_GridWidth As Integer
+Private m_GridHeight As Integer
+
+' Inicializar la serpiente
+Public Sub InitSnake(ByVal startX As Integer, ByVal startY As Integer, ByVal gridWidth As Integer, ByVal gridHeight As Integer)
+    ReDim m_SnakeBody(0)
+    m_SnakeBody(0).X = startX
+    m_SnakeBody(0).Y = startY
+    m_Direction = "RIGHT"
+    m_GridWidth = gridWidth
+    m_GridHeight = gridHeight
+End Sub
+
+' Cambiar la dirección de la serpiente
+Public Sub ChangeDirection(ByVal newDirection As String)
+    ' Evitar que la serpiente se mueva hacia la dirección opuesta directamente
+    Select Case newDirection
+        Case "UP"
+            If m_Direction <> "DOWN" Then m_Direction = "UP"
+        Case "DOWN"
+            If m_Direction <> "UP" Then m_Direction = "DOWN"
+        Case "LEFT"
+            If m_Direction <> "RIGHT" Then m_Direction = "LEFT"
+        Case "RIGHT"
+            If m_Direction <> "LEFT" Then m_Direction = "RIGHT"
+    End Select
+End Sub
+
+' Mover la serpiente
+Public Function MoveSnake() As Boolean
+    Dim newHead As Coordinate
+    newHead = m_SnakeBody(0)
+    
+    Select Case m_Direction
+        Case "UP"
+            newHead.Y = newHead.Y - 1
+        Case "DOWN"
+            newHead.Y = newHead.Y + 1
+        Case "LEFT"
+            newHead.X = newHead.X - 1
+        Case "RIGHT"
+            newHead.X = newHead.X + 1
+    End Select
+    
+    ' Verificar colisiones con los bordes
+    If newHead.X < 0 Or newHead.X >= m_GridWidth Or newHead.Y < 0 Or newHead.Y >= m_GridHeight Then
+        MoveSnake = False
+        Exit Function
+    End If
+    
+    ' Verificar colisiones con la propia serpiente
+    Dim i As Integer
+    For i = 0 To UBound(m_SnakeBody)
+        If m_SnakeBody(i).X = newHead.X And m_SnakeBody(i).Y = newHead.Y Then
+            MoveSnake = False
+            Exit Function
+        End If
+    Next i
+    
+    ' Mover la serpiente
+    If UBound(m_SnakeBody) < 9 Then
+        ReDim Preserve m_SnakeBody(UBound(m_SnakeBody) + 1)
+    End If
+    Dim j As Integer
+    For j = UBound(m_SnakeBody) To 1 Step -1
+        m_SnakeBody(j) = m_SnakeBody(j - 1)
+    Next j
+    m_SnakeBody(0) = newHead
+    
+    MoveSnake = True
+End Function
+
+' Dibujar la serpiente en el formulario
+Public Sub DrawSnake(frm As Form)
+    Dim ctrl As Control
+    For Each ctrl In frm.Controls
+        If TypeOf ctrl Is Label Then
+            ctrl.Caption = ""
+        End If
+    Next ctrl
+    
+    Dim i As Integer
+    For i = 0 To UBound(m_SnakeBody)
+        frm.Controls("lbl" & m_SnakeBody(i).Y * m_GridWidth + m_SnakeBody(i).X + 1).Caption = "O"
+    Next i
+End Sub

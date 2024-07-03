@@ -1,0 +1,35 @@
+Option Compare Database
+Option Explicit
+
+
+Public Function CreaLabels(sFormName As String)
+    Dim i As Integer
+    Dim j As Integer
+    Dim lbl As Control
+    Dim lblName As String
+    Dim lblWidth As Integer
+    Dim lblHeight As Integer
+    Dim marginX As Integer
+    Dim marginY As Integer
+    Dim frm As Form
+    DoCmd.OpenForm sFormName, acDesign
+    Set frm = Forms(sFormName)
+    DoCmd.Maximize
+    ' Configuración del tamaño y la posición inicial de las etiquetas
+    lblWidth = 557 ' 1 cm
+    lblHeight = 557 ' 1 cm
+    marginX = 10 ' Espacio entre etiquetas horizontal
+    marginY = 10 ' Espacio entre etiquetas vertical
+
+    ' Crear 200 etiquetas en una cuadrícula de 10 filas y 20 columnas
+    For i = 0 To 9 ' Filas
+        For j = 0 To 19 ' Columnas
+            lblName = "lbl" & (i * 20 + j + 1)
+            Set lbl = CreateControl(frm.Name, acLabel, , , , j * (lblWidth + marginX), i * (lblHeight + marginY), lblWidth, lblHeight)
+            With lbl
+                .Name = "lbl" & (i * 20 + j + 1)
+                .Caption = ""
+            End With
+        Next j
+    Next i
+End Function
